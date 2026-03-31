@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend:
+    name: frontend-checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: setup-pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: install-dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: lint-web
+        run: pnpm --filter web-portal lint
+
+      - name: build-web
+        run: pnpm --filter web-portal build
+
+  backend:
+    name: backend-checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: setup-java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
+      - name: run-backend-tests
+        working-directory: apps/server
+        run: mvn -B -ntp test
