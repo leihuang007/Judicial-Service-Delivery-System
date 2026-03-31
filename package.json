@@ -1,0 +1,12 @@
+{
+  "name": "judicial-service-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.12.0",
+  "scripts": {
+    "dev:web": "pnpm --filter web-portal dev",
+    "build:web": "pnpm --filter web-portal build",
+    "lint:web": "pnpm --filter web-portal lint",
+    "test:web": "pnpm --filter web-portal test"
+  }
+}

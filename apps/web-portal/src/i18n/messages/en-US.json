@@ -1,0 +1,18 @@
+{
+  "header": {
+    "title": "Judicial Service Delivery Platform",
+    "subtitle": "Unified orchestration for SMS, email, postal, and notary service with legal traceability.",
+    "status": "System healthy"
+  },
+  "kpi": {
+    "pending": "Pending Tasks",
+    "success": "Effective Service Today",
+    "warning": "Deadline Alerts"
+  },
+  "list": {
+    "title": "Priority Work Items",
+    "one": "Case (2026) ZJ01 Civil 1532 - Hearing Notice",
+    "two": "Case (2026) ZJ01 Appeal 882 - Ruling",
+    "three": "Case (2026) ZJ01 Enforcement 201 - Enforcement Notice"
+  }
+}

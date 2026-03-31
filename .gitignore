@@ -1,0 +1,27 @@
+# Node
+node_modules/
+.pnpm-store/
+.next/
+out/
+dist/
+
+# Java
+target/
+*.class
+*.log
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+
+# Coverage
+coverage/

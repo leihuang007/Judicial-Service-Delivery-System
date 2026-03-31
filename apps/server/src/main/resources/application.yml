@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: judicial-service-server
+  datasource:
+    url: jdbc:postgresql://localhost:5432/judicial_service
+    username: judicial
+    password: judicial123
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+server:
+  port: 8080
