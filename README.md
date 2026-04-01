@@ -48,6 +48,12 @@ This command starts:
 pnpm smoke
 ```
 
+### 4.1) End-to-end smoke test
+
+```powershell
+pnpm e2e:smoke
+```
+
 ### 5) Stop full test environment
 
 ```powershell
