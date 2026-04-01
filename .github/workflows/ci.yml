@@ -13,6 +13,17 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  dependency-review:
+    name: dependency-review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: dependency-review
+        uses: actions/dependency-review-action@v4
+
   frontend:
     name: frontend-checks
     runs-on: ubuntu-latest
@@ -40,6 +51,21 @@ jobs:
       - name: build-web
         run: pnpm --filter web-portal build
 
+  security-scan:
+    name: filesystem-security-scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: trivy-fs-scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          format: table
+          exit-code: '1'
+          severity: CRITICAL,HIGH
+
   backend:
     name: backend-checks
     runs-on: ubuntu-latest
@@ -54,6 +80,13 @@ jobs:
           java-version: 21
           cache: maven
 
-      - name: run-backend-tests
+      - name: run-backend-tests-and-coverage
         working-directory: apps/server
-        run: mvn -B -ntp test
+        run: mvn -B -ntp verify
+
+      - name: upload-backend-coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jacoco-report
+          path: apps/server/target/site/jacoco/
+          if-no-files-found: error

@@ -13,7 +13,9 @@ This document defines the recommended protection policy for the main branch.
 3. Dismiss stale pull request approvals when new commits are pushed
 4. Require status checks to pass before merging
 5. Required checks:
+   - dependency-review
    - frontend-checks
+   - filesystem-security-scan
    - backend-checks
 6. Require conversation resolution before merging
 7. Require linear history
