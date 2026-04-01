@@ -1,13 +1,23 @@
+import { notFound } from "next/navigation";
+import { ConsoleShell } from "@/components/console-shell";
 import { apiGet, StrategyItem } from "@/lib/api";
+import { requireSession } from "@/lib/access-control";
+import { AppLocale, isValidLocale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 
-export default async function StrategiesPage() {
-  const strategies = await apiGet<StrategyItem[]>('/api/strategies').catch(() => []);
+export default async function StrategiesPage({ params }: { params: { locale: string } }) {
+  if (!isValidLocale(params.locale)) {
+    notFound();
+  }
+
+  const locale = params.locale as AppLocale;
+  const dict = getDictionary(locale);
+  requireSession(locale);
+  const strategies = await apiGet<StrategyItem[]>("/api/strategies").catch(() => []);
 
   return (
-    <main className="container">
+    <ConsoleShell locale={locale} dict={dict} active="strategies" title={dict.nav.strategies} subtitle="配置不同案由和时限策略，统一重试规则">
       <section className="panel">
-        <h1>Strategies</h1>
-        <p className="subtitle">送达策略配置</p>
         <div className="card-list">
           {strategies.map((s) => (
             <div className="card-row" key={s.id}>
@@ -15,9 +25,9 @@ export default async function StrategiesPage() {
               <span className="tag">{s.enabledFlag ? "ENABLED" : "DISABLED"}</span>
             </div>
           ))}
-          {strategies.length === 0 && <div className="card-row"><span>No strategies yet.</span></div>}
+          {strategies.length === 0 && <div className="card-row"><span>{dict.common.empty}</span></div>}
         </div>
       </section>
-    </main>
+    </ConsoleShell>
   );
 }

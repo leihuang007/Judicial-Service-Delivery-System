@@ -1,18 +1,38 @@
 {
-  "header": {
-    "title": "Judicial Service Delivery Platform",
-    "subtitle": "Unified orchestration for SMS, email, postal, and notary service with legal traceability.",
-    "status": "System healthy"
+  "platform": {
+    "name": "Judicial Service Delivery System",
+    "org": "Municipal Intermediate People's Court"
   },
-  "kpi": {
-    "pending": "Pending Tasks",
-    "success": "Effective Service Today",
-    "warning": "Deadline Alerts"
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Unified case delivery, orchestration, evidence preservation, and auditing",
+    "username": "Username",
+    "password": "Password",
+    "button": "Enter Workspace",
+    "hint": "Demo mode allows direct entry without authentication"
   },
-  "list": {
-    "title": "Priority Work Items",
-    "one": "Case (2026) ZJ01 Civil 1532 - Hearing Notice",
-    "two": "Case (2026) ZJ01 Appeal 882 - Ruling",
-    "three": "Case (2026) ZJ01 Enforcement 201 - Enforcement Notice"
+  "nav": {
+    "dashboard": "Dashboard",
+    "cases": "Case Ledger",
+    "tasks": "Service Tasks",
+    "strategies": "Strategy Center",
+    "evidence": "Evidence Center",
+    "exceptions": "Exception Desk",
+    "audit": "Audit Trail"
+  },
+  "dashboard": {
+    "title": "Service Delivery Overview",
+    "subtitle": "Focus on legal deadlines, delivery effectiveness, and exception handling",
+    "kpiPending": "Pending Tasks",
+    "kpiEffective": "Effective Service",
+    "kpiAlert": "Deadline Alerts",
+    "panelTodo": "Today's Priorities",
+    "panelFlow": "Workflow Pulse"
+  },
+  "common": {
+    "empty": "No data",
+    "search": "Search",
+    "filter": "Filter",
+    "detail": "Details"
   }
 }

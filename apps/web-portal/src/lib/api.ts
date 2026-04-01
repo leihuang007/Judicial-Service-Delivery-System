@@ -15,6 +15,7 @@ export type CaseItem = {
   courtCode: string;
   tribunalCode: string;
   caseStatus: string;
+  acceptedAt?: string;
 };
 
 export type TaskItem = {

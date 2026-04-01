@@ -1,18 +1,38 @@
 {
-  "header": {
-    "title": "司法送达协同平台",
-    "subtitle": "统一管理短信、邮件、邮政与公证送达，确保依法、可追溯、可审计。",
-    "status": "运行状态稳定"
+  "platform": {
+    "name": "智慧司法送达业务系统",
+    "org": "某某市中级人民法院"
   },
-  "kpi": {
-    "pending": "待处理任务",
-    "success": "今日有效送达",
-    "warning": "临期预警"
+  "login": {
+    "title": "欢迎登录",
+    "subtitle": "统一办理案件送达、流程编排、证据留痕与审计核查",
+    "username": "账号",
+    "password": "密码",
+    "button": "登录系统",
+    "hint": "演示环境无需鉴权，点击登录直接进入工作台"
   },
-  "list": {
-    "title": "重点任务",
-    "one": "(2026) 浙 01 民初 1532 号 - 开庭传票",
-    "two": "(2026) 浙 01 民终 882 号 - 裁定书",
-    "three": "(2026) 浙 01 执 201 号 - 执行通知"
+  "nav": {
+    "dashboard": "业务总览",
+    "cases": "案件台账",
+    "tasks": "送达任务",
+    "strategies": "策略中心",
+    "evidence": "证据中心",
+    "exceptions": "异常工单",
+    "audit": "审计追踪"
+  },
+  "dashboard": {
+    "title": "送达业务总览",
+    "subtitle": "聚焦法定期限、送达有效性和异常处置效率",
+    "kpiPending": "待处理任务",
+    "kpiEffective": "有效送达",
+    "kpiAlert": "临期预警",
+    "panelTodo": "今日重点办理",
+    "panelFlow": "流程态势"
+  },
+  "common": {
+    "empty": "暂无数据",
+    "search": "检索",
+    "filter": "筛选",
+    "detail": "查看详情"
   }
 }

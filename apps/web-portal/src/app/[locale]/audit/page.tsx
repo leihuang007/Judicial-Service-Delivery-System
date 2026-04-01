@@ -1,4 +1,9 @@
-import { apiGet } from "@/lib/api";
+import { notFound } from "next/navigation";
+import { ConsoleShell } from "@/components/console-shell";
+import { apiGet, CaseItem, TaskItem } from "@/lib/api";
+import { applyCaseScope, applyTaskScope, requireSession } from "@/lib/access-control";
+import { AppLocale, isValidLocale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 
 type AuditItem = {
   id: number;
@@ -9,24 +14,44 @@ type AuditItem = {
   actionTime: string;
 };
 
-export default async function AuditPage() {
-  const logs = await apiGet<AuditItem[]>('/api/audit/recent').catch(() => []);
+export default async function AuditPage({ params }: { params: { locale: string } }) {
+  if (!isValidLocale(params.locale)) {
+    notFound();
+  }
+
+  const locale = params.locale as AppLocale;
+  const dict = getDictionary(locale);
+  const session = requireSession(locale);
+  const allCases = await apiGet<CaseItem[]>("/api/cases").catch(() => []);
+  const allTasks = await apiGet<TaskItem[]>("/api/tasks").catch(() => []);
+  const scopedCases = applyCaseScope(allCases, session);
+  const scopedTaskIds = new Set(applyTaskScope(allTasks, scopedCases).map((t) => t.id));
+  const scopedCaseIds = new Set(scopedCases.map((c) => c.id));
+  const logs = await apiGet<AuditItem[]>("/api/audit/recent").catch(() => []);
+  const filteredLogs = logs.filter((l) => {
+    const resourceId = Number(l.resourceId);
+    if (l.resourceType === "CASE") {
+      return scopedCaseIds.has(resourceId);
+    }
+    if (l.resourceType === "SERVICE_TASK" || l.resourceType === "TASK_EVALUATION") {
+      return scopedTaskIds.has(resourceId);
+    }
+    return true;
+  });
 
   return (
-    <main className="container">
+    <ConsoleShell locale={locale} dict={dict} active="audit" title={dict.nav.audit} subtitle="关键写操作与状态变更按时间可追踪">
       <section className="panel">
-        <h1>Audit Logs</h1>
-        <p className="subtitle">最近 200 条审计日志</p>
         <div className="card-list">
-          {logs.map((l) => (
+          {filteredLogs.map((l) => (
             <div className="card-row" key={l.id}>
               <span>{l.actionType} / {l.resourceType}#{l.resourceId}</span>
               <span>{l.actionTime}</span>
             </div>
           ))}
-          {logs.length === 0 && <div className="card-row"><span>No audit logs yet.</span></div>}
+          {filteredLogs.length === 0 && <div className="card-row"><span>{dict.common.empty}</span></div>}
         </div>
       </section>
-    </main>
+    </ConsoleShell>
   );
 }
