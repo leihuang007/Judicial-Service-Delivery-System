@@ -60,9 +60,9 @@ This checklist defines the full development scope and tracks completion progress
 
 - [x] Unit/integration tests for core APIs
 - [x] E2E smoke flow for create->deliver->evidence
-- [ ] Security hardening and sensitive field masking
-- [ ] Performance baseline and operational metrics
-- [ ] Release checklist and production readiness
+- [x] Security hardening and sensitive field masking
+- [x] Performance baseline and operational metrics
+- [x] Release checklist and production readiness
 
 ## Current Sprint Target
 

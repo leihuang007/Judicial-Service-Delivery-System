@@ -4,6 +4,8 @@ import com.court.service.casefile.CaseInfo;
 import com.court.service.casefile.CaseInfoRepository;
 import com.court.service.common.AuditService;
 import com.court.service.common.NotFoundException;
+import com.court.service.security.MaskingUtils;
+import com.court.service.security.SensitiveCryptoService;
 import java.time.OffsetDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -16,16 +18,19 @@ public class PartyService {
     private final CasePartyRepository casePartyRepository;
     private final PartyContactRepository partyContactRepository;
     private final AuditService auditService;
+    private final SensitiveCryptoService sensitiveCryptoService;
 
     public PartyService(
             CaseInfoRepository caseInfoRepository,
             CasePartyRepository casePartyRepository,
             PartyContactRepository partyContactRepository,
-            AuditService auditService) {
+            AuditService auditService,
+            SensitiveCryptoService sensitiveCryptoService) {
         this.caseInfoRepository = caseInfoRepository;
         this.casePartyRepository = casePartyRepository;
         this.partyContactRepository = partyContactRepository;
         this.auditService = auditService;
+        this.sensitiveCryptoService = sensitiveCryptoService;
     }
 
     @Transactional
@@ -63,7 +68,7 @@ public class PartyService {
         PartyContact contact = new PartyContact();
         contact.setCaseParty(party);
         contact.setContactType(request.contactType());
-        contact.setContactValue(request.contactValue());
+        contact.setContactValue(sensitiveCryptoService.encrypt(request.contactValue()));
         contact.setPrimary(request.isPrimary());
         contact.setCreatedAt(now);
         contact.setUpdatedAt(now);
@@ -92,11 +97,12 @@ public class PartyService {
     }
 
     private PartyDtos.ContactResponse toContactResponse(PartyContact contact) {
+        String plain = sensitiveCryptoService.decrypt(contact.getContactValue());
         return new PartyDtos.ContactResponse(
                 contact.getId(),
                 contact.getCaseParty().getId(),
                 contact.getContactType(),
-                contact.getContactValue(),
+            MaskingUtils.mask(contact.getContactType(), plain),
                 contact.isPrimary(),
                 contact.getCreatedAt(),
                 contact.getUpdatedAt());

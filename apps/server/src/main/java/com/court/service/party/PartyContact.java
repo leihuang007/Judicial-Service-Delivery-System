@@ -26,7 +26,7 @@ public class PartyContact {
     @Column(name = "contact_type", nullable = false, length = 16)
     private String contactType;
 
-    @Column(name = "contact_value", nullable = false, length = 256)
+    @Column(name = "contact_value", nullable = false, length = 512)
     private String contactValue;
 
     @Column(name = "is_primary", nullable = false)
