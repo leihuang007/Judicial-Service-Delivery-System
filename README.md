@@ -28,24 +28,54 @@ From repository root:
 pnpm install
 ```
 
-### 3) Start local infrastructure
+### 3) Start full test environment (recommended)
+
+From repository root:
+
+```powershell
+pnpm dev:up
+```
+
+This command starts:
+
+- Infrastructure (PostgreSQL, Redis, RabbitMQ, MinIO)
+- Backend service on `http://localhost:8080`
+- Frontend service on `http://localhost:3000`
+
+### 4) Smoke test
+
+```powershell
+pnpm smoke
+```
+
+### 5) Stop full test environment
+
+```powershell
+pnpm dev:down
+```
+
+### 6) Manual startup (optional)
+
+If you prefer manual startup, use the following steps.
+
+#### 6.1 Start local infrastructure
 
 ```powershell
 docker compose -f infra/docker/docker-compose.yml up -d
 ```
 
-### 4) Run backend
+#### 6.2 Run backend
 
 ```powershell
 cd apps/server
-mvn spring-boot:run
+mvn -f pom.xml org.springframework.boot:spring-boot-maven-plugin:3.3.5:run
 ```
 
-### 5) Run frontend
+#### 6.3 Run frontend
 
 ```powershell
 cd apps/web-portal
-pnpm dev
+pnpm dev -- --port 3000
 ```
 
 Open `http://localhost:3000`.

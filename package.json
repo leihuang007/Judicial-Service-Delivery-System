@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "packageManager": "pnpm@9.12.0",
   "scripts": {
+    "dev:up": "powershell -ExecutionPolicy Bypass -File ./scripts/dev-up.ps1",
+    "dev:down": "powershell -ExecutionPolicy Bypass -File ./scripts/dev-down.ps1",
+    "smoke": "powershell -ExecutionPolicy Bypass -Command \"Invoke-WebRequest -UseBasicParsing http://localhost:3000 | Select-Object -ExpandProperty StatusCode; Invoke-WebRequest -UseBasicParsing http://localhost:8080/api/system/healthz | Select-Object -ExpandProperty StatusCode\"",
     "dev:web": "pnpm --filter web-portal dev",
     "build:web": "pnpm --filter web-portal build",
     "lint:web": "pnpm --filter web-portal lint",
