@@ -171,3 +171,7 @@ export function requireCaseInScope(caseItem: CaseItem, session: UserSession): Ca
   }
   return caseItem;
 }
+
+export function toCourtCodesQuery(session: UserSession): string {
+  return encodeURIComponent(session.allowedCourtCodes.join(","));
+}

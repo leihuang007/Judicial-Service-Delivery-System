@@ -4,7 +4,7 @@ import { ConsoleShell } from "@/components/console-shell";
 import { AppLocale, isValidLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionary";
 import { apiGet, CaseItem, TaskItem } from "@/lib/api";
-import { applyTaskScope, requireCaseInScope, requireSession } from "@/lib/access-control";
+import { applyTaskScope, requireCaseInScope, requireSession, toCourtCodesQuery } from "@/lib/access-control";
 import {
   displayCaseStatus,
   displayCaseType,
@@ -27,6 +27,7 @@ export default async function CaseDetailPage({ params }: Props) {
   const isZh = locale === "zh-CN";
   const dict = getDictionary(locale);
   const session = requireSession(locale);
+  const courtCodes = toCourtCodesQuery(session);
   const id = Number(params.id);
 
   const caseItem = await apiGet<CaseItem>(`/api/cases/${id}`).catch(() => null);
@@ -35,7 +36,7 @@ export default async function CaseDetailPage({ params }: Props) {
   }
   requireCaseInScope(caseItem, session);
 
-  const tasks = await apiGet<TaskItem[]>("/api/tasks").catch(() => []);
+  const tasks = await apiGet<TaskItem[]>(`/api/tasks?courtCodes=${courtCodes}`).catch(() => []);
   const related = applyTaskScope(tasks, [caseItem]).filter((t) => t.caseId === id);
 
   return (
@@ -74,6 +75,9 @@ export default async function CaseDetailPage({ params }: Props) {
       </section>
 
       <section className="panel">
+        <Link href={`/${locale}/tasks?caseId=${caseItem.id}`} className="primary-btn btn-inline" style={{ marginRight: 8 }}>
+          {isZh ? "基于本案新建送达任务" : "Create Task for This Case"}
+        </Link>
         <Link href={`/${locale}/cases`} className="ghost-btn">{isZh ? "返回案件台账" : "Back to Cases"}</Link>
       </section>
     </ConsoleShell>

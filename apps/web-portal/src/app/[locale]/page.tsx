@@ -4,7 +4,7 @@ import { ConsoleShell } from "@/components/console-shell";
 import { AppLocale, isValidLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionary";
 import { apiGet, CaseItem, TaskItem } from "@/lib/api";
-import { applyCaseScope, applyTaskScope, requireSession } from "@/lib/access-control";
+import { requireSession, toCourtCodesQuery } from "@/lib/access-control";
 
 type Props = {
   params: {
@@ -20,10 +20,9 @@ export default async function LocaleHome({ params }: Props) {
   const locale = params.locale as AppLocale;
   const dict = getDictionary(locale);
   const session = requireSession(locale);
-  const allTasks = await apiGet<TaskItem[]>("/api/tasks").catch(() => []);
-  const allCases = await apiGet<CaseItem[]>("/api/cases").catch(() => []);
-  const cases = applyCaseScope(allCases, session);
-  const tasks = applyTaskScope(allTasks, cases);
+  const courtCodes = toCourtCodesQuery(session);
+  const tasks = await apiGet<TaskItem[]>(`/api/tasks?courtCodes=${courtCodes}`).catch(() => []);
+  const cases = await apiGet<CaseItem[]>(`/api/cases?courtCodes=${courtCodes}`).catch(() => []);
 
   const pending = tasks.filter((t) => t.currentStatus !== "EFFECTIVE" && t.currentStatus !== "ARCHIVED").length;
   const effective = tasks.filter((t) => t.currentStatus === "EFFECTIVE").length;

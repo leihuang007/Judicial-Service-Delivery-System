@@ -5,7 +5,7 @@ import { apiGet, CaseItem } from "@/lib/api";
 import { displayCaseStatus, displayCaseType, displayCourt } from "@/lib/cn-format";
 import { AppLocale, isValidLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionary";
-import { applyCaseScope, requireSession } from "@/lib/access-control";
+import { requireSession, toCourtCodesQuery } from "@/lib/access-control";
 
 export default async function CasesPage({
   params,
@@ -21,7 +21,8 @@ export default async function CasesPage({
   const locale = params.locale as AppLocale;
   const dict = getDictionary(locale);
   const session = requireSession(locale);
-  const cases = applyCaseScope(await apiGet<CaseItem[]>("/api/cases").catch(() => []), session);
+  const courtCodes = toCourtCodesQuery(session);
+  const cases = await apiGet<CaseItem[]>(`/api/cases?courtCodes=${courtCodes}`).catch(() => []);
   const q = searchParams?.q?.trim().toLowerCase() || "";
   const status = searchParams?.status?.trim() || "";
   const page = Math.max(1, Number(searchParams?.page || "1"));

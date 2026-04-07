@@ -3,7 +3,10 @@ package com.court.service.casefile;
 import com.court.service.common.NotFoundException;
 import com.court.service.common.AuditService;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,10 +45,39 @@ public class CaseService {
     }
 
     @Transactional(readOnly = true)
-    public List<CaseDtos.CaseResponse> listCases() {
+    public List<CaseDtos.CaseResponse> listCases(String status, String courtCode, String courtCodes, String q) {
+        String normalizedStatus = status == null ? "" : status.trim();
+        String normalizedCourt = courtCode == null ? "" : courtCode.trim();
+        String normalizedQuery = q == null ? "" : q.trim().toLowerCase();
+        Set<String> normalizedCourts = parseCourtCodes(courtCodes);
+
+        if (!normalizedCourt.isBlank()) {
+            normalizedCourts.add(normalizedCourt.toLowerCase());
+        }
+
         return caseInfoRepository.findAll().stream()
+                .filter(c -> normalizedStatus.isBlank() || normalizedStatus.equalsIgnoreCase(c.getCaseStatus()))
+                .filter(c -> normalizedCourts.isEmpty() || normalizedCourts.contains(c.getCourtCode().toLowerCase()))
+                .filter(c -> {
+                    if (normalizedQuery.isBlank()) {
+                        return true;
+                    }
+                    String text = (c.getCaseNo() + " " + c.getCaseType() + " " + c.getCourtCode() + " " + c.getTribunalCode()).toLowerCase();
+                    return text.contains(normalizedQuery);
+                })
                 .map(this::toResponse)
                 .toList();
+    }
+
+    private Set<String> parseCourtCodes(String courtCodes) {
+        if (courtCodes == null || courtCodes.isBlank()) {
+            return new java.util.HashSet<>();
+        }
+        return Arrays.stream(courtCodes.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
     }
 
     @Transactional(readOnly = true)

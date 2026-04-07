@@ -57,3 +57,14 @@ export type EvidenceItem = {
   hashSha256: string;
   createdAt: string;
 };
+
+export type TaskEventItem = {
+  id: number;
+  taskId: number;
+  eventType: string;
+  fromStatus: string | null;
+  toStatus: string | null;
+  eventNote: string | null;
+  actor: string;
+  createdAt: string;
+};

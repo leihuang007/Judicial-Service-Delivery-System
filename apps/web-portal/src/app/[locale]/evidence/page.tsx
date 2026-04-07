@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ConsoleShell } from "@/components/console-shell";
-import { apiGet, CaseItem, EvidenceItem, TaskItem } from "@/lib/api";
-import { applyCaseScope, applyTaskScope, requireSession } from "@/lib/access-control";
+import { apiGet, EvidenceItem, TaskItem } from "@/lib/api";
+import { requireSession, toCourtCodesQuery } from "@/lib/access-control";
 import { AppLocale, isValidLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionary";
 
@@ -13,10 +13,8 @@ export default async function EvidencePage({ params }: { params: { locale: strin
   const locale = params.locale as AppLocale;
   const dict = getDictionary(locale);
   const session = requireSession(locale);
-  const allCases = await apiGet<CaseItem[]>("/api/cases").catch(() => []);
-  const allTasks = await apiGet<TaskItem[]>("/api/tasks").catch(() => []);
-  const scopedCases = applyCaseScope(allCases, session);
-  const scopedTasks = applyTaskScope(allTasks, scopedCases);
+  const courtCodes = toCourtCodesQuery(session);
+  const scopedTasks = await apiGet<TaskItem[]>(`/api/tasks?courtCodes=${courtCodes}`).catch(() => []);
   const evidenceGroups = await Promise.all(
     scopedTasks.slice(0, 20).map((t) => apiGet<EvidenceItem[]>(`/api/evidence?taskId=${t.id}`).catch(() => []))
   );

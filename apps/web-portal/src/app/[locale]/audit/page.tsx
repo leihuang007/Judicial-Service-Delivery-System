@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { ConsoleShell } from "@/components/console-shell";
 import { apiGet, CaseItem, TaskItem } from "@/lib/api";
-import { applyCaseScope, applyTaskScope, requireSession } from "@/lib/access-control";
+import { requireSession, toCourtCodesQuery } from "@/lib/access-control";
 import { AppLocale, isValidLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionary";
 
@@ -22,10 +22,10 @@ export default async function AuditPage({ params }: { params: { locale: string }
   const locale = params.locale as AppLocale;
   const dict = getDictionary(locale);
   const session = requireSession(locale);
-  const allCases = await apiGet<CaseItem[]>("/api/cases").catch(() => []);
-  const allTasks = await apiGet<TaskItem[]>("/api/tasks").catch(() => []);
-  const scopedCases = applyCaseScope(allCases, session);
-  const scopedTaskIds = new Set(applyTaskScope(allTasks, scopedCases).map((t) => t.id));
+  const courtCodes = toCourtCodesQuery(session);
+  const scopedCases = await apiGet<CaseItem[]>(`/api/cases?courtCodes=${courtCodes}`).catch(() => []);
+  const scopedTasks = await apiGet<TaskItem[]>(`/api/tasks?courtCodes=${courtCodes}`).catch(() => []);
+  const scopedTaskIds = new Set(scopedTasks.map((t) => t.id));
   const scopedCaseIds = new Set(scopedCases.map((c) => c.id));
   const logs = await apiGet<AuditItem[]>("/api/audit/recent").catch(() => []);
   const filteredLogs = logs.filter((l) => {

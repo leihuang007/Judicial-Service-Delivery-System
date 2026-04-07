@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class TaskController {
 
     private final TaskService taskService;
+    private final TaskLifecycleEventService taskLifecycleEventService;
 
-    public TaskController(TaskService taskService) {
+    public TaskController(TaskService taskService, TaskLifecycleEventService taskLifecycleEventService) {
         this.taskService = taskService;
+        this.taskLifecycleEventService = taskLifecycleEventService;
     }
 
     @PostMapping
@@ -26,12 +28,22 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskDtos.TaskResponse> listTasks(@RequestParam(required = false) String status) {
-        return taskService.listTasks(status);
+    public List<TaskDtos.TaskResponse> listTasks(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String courtCode,
+            @RequestParam(required = false) String courtCodes,
+            @RequestParam(required = false) String caseNo,
+            @RequestParam(required = false) String q) {
+        return taskService.listTasks(status, courtCode, courtCodes, caseNo, q);
     }
 
     @GetMapping("/{taskId}")
     public TaskDtos.TaskResponse getTask(@PathVariable Long taskId) {
         return taskService.getTask(taskId);
+    }
+
+    @GetMapping("/{taskId}/events")
+    public List<TaskLifecycleDtos.EventResponse> listTaskEvents(@PathVariable Long taskId) {
+        return taskLifecycleEventService.listTaskEvents(taskId);
     }
 }

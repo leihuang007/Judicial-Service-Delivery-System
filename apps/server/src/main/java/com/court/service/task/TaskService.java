@@ -6,8 +6,11 @@ import com.court.service.common.NotFoundException;
 import com.court.service.common.AuditService;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,15 +22,18 @@ public class TaskService {
     private final ServiceTaskRepository serviceTaskRepository;
     private final CaseInfoRepository caseInfoRepository;
     private final AuditService auditService;
+    private final TaskLifecycleEventService taskLifecycleEventService;
     private final Random random = new Random();
 
     public TaskService(
             ServiceTaskRepository serviceTaskRepository,
             CaseInfoRepository caseInfoRepository,
-            AuditService auditService) {
+            AuditService auditService,
+            TaskLifecycleEventService taskLifecycleEventService) {
         this.serviceTaskRepository = serviceTaskRepository;
         this.caseInfoRepository = caseInfoRepository;
         this.auditService = auditService;
+        this.taskLifecycleEventService = taskLifecycleEventService;
     }
 
     @Transactional
@@ -49,16 +55,61 @@ public class TaskService {
 
         ServiceTask saved = serviceTaskRepository.save(task);
         auditService.logCreate("system", "SERVICE_TASK", saved.getId());
+        taskLifecycleEventService.recordEvent(
+            saved,
+            "TASK_CREATED",
+            null,
+            saved.getCurrentStatus(),
+            "Task created by API request.",
+            "system");
         return toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<TaskDtos.TaskResponse> listTasks(String status) {
-        List<ServiceTask> tasks = status == null || status.isBlank()
-                ? serviceTaskRepository.findAll()
-                : serviceTaskRepository.findByCurrentStatus(status);
+    public List<TaskDtos.TaskResponse> listTasks(String status, String courtCode, String courtCodes, String caseNo, String q) {
+        String normalizedStatus = status == null ? "" : status.trim();
+        String normalizedCourt = courtCode == null ? "" : courtCode.trim();
+        String normalizedCaseNo = caseNo == null ? "" : caseNo.trim();
+        String normalizedQuery = q == null ? "" : q.trim().toLowerCase();
+        Set<String> normalizedCourts = parseCourtCodes(courtCodes);
 
-        return tasks.stream().map(this::toResponse).toList();
+        if (!normalizedCourt.isBlank()) {
+            normalizedCourts.add(normalizedCourt.toLowerCase());
+        }
+
+        List<ServiceTask> tasks = normalizedStatus.isBlank()
+                ? serviceTaskRepository.findAll()
+            : serviceTaskRepository.findByCurrentStatus(normalizedStatus);
+
+        return tasks.stream()
+            .filter(t -> normalizedCourts.isEmpty() || normalizedCourts.contains(t.getCaseInfo().getCourtCode().toLowerCase()))
+            .filter(t -> normalizedCaseNo.isBlank() || t.getCaseInfo().getCaseNo().equalsIgnoreCase(normalizedCaseNo))
+            .filter(t -> {
+                if (normalizedQuery.isBlank()) {
+                return true;
+                }
+                String text = (
+                    t.getTaskNo() + " "
+                        + t.getCaseInfo().getCaseNo() + " "
+                        + t.getPartyName() + " "
+                        + t.getDocType() + " "
+                        + t.getCaseInfo().getCourtCode())
+                    .toLowerCase();
+                return text.contains(normalizedQuery);
+            })
+            .map(this::toResponse)
+            .toList();
+    }
+
+    private Set<String> parseCourtCodes(String courtCodes) {
+        if (courtCodes == null || courtCodes.isBlank()) {
+            return new java.util.HashSet<>();
+        }
+        return Arrays.stream(courtCodes.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
     }
 
     @Transactional(readOnly = true)
